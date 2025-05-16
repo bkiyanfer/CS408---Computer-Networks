@@ -1,3 +1,27 @@
+import os
+import logging
+from logging.handlers import RotatingFileHandler
+
+def setup_logging(name: str):
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    log_dir = os.path.join(base_dir, "logs")
+    os.makedirs(log_dir, exist_ok=True)
+
+    log_path = os.path.join(log_dir, f"{name}.log")
+
+    file_handler = RotatingFileHandler(log_path, maxBytes=500_000, backupCount=3)
+    file_handler.setFormatter(logging.Formatter(
+        "%(asctime)s [%(levelname)s] %(message)s", "%Y-%m-%d %H:%M:%S"
+    ))
+
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(logging.Formatter(
+        "%(asctime)s [%(levelname)s] %(message)s", "%Y-%m-%d %H:%M:%S"
+    ))
+
+    logging.basicConfig(level=logging.INFO, handlers=[file_handler, console_handler])
+
+
 import argparse
 import json
 import logging
@@ -27,12 +51,6 @@ def parse_args():
                         help="Number of readings for rolling average")
     return parser.parse_args()
 
-def setup_logging():
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s [%(levelname)s] %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S"
-    )
 
 class DroneEdge:
     def __init__(self, port, central_ip, central_port,
@@ -298,7 +316,9 @@ class DroneGUI:
 
 if __name__ == "__main__":
     args = parse_args()
-    setup_logging()
+    setup_logging("drone")
+    logging.info("Drone edge server started")
+    #setup_logging()
     drone = DroneEdge(
         args.drone_port, args.central_ip, args.central_port,
         args.battery_threshold, args.forward_interval,

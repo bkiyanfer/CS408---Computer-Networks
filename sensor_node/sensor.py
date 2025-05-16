@@ -1,3 +1,27 @@
+import os
+import logging
+from logging.handlers import RotatingFileHandler
+
+def setup_logging(name: str):
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    log_dir = os.path.join(base_dir, "logs")
+    os.makedirs(log_dir, exist_ok=True)
+
+    log_path = os.path.join(log_dir, f"{name}.log")
+
+    file_handler = RotatingFileHandler(log_path, maxBytes=500_000, backupCount=3)
+    file_handler.setFormatter(logging.Formatter(
+        "%(asctime)s [%(levelname)s] %(message)s", "%Y-%m-%d %H:%M:%S"
+    ))
+
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(logging.Formatter(
+        "%(asctime)s [%(levelname)s] %(message)s", "%Y-%m-%d %H:%M:%S"
+    ))
+
+    logging.basicConfig(level=logging.INFO, handlers=[file_handler, console_handler])
+
+
 import argparse
 import json
 import logging
@@ -20,12 +44,6 @@ def parse_args():
     return parser.parse_args()
 
 
-def setup_logging(sensor_id):
-    logging.basicConfig(
-        level=logging.INFO,
-        format=f"%(asctime)s [%(levelname)s] [{sensor_id}] %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S"
-    )
 
 
 class SensorNode:
@@ -87,11 +105,13 @@ class SensorNode:
         if self.socket:
             self.socket.close()
         logging.info("Sensor node stopped")
-s
+
 
 if __name__ == "__main__":
     args = parse_args()
     sensor_id = f"sensor_{random.randint(1000, 9999)}"
+    setup_logging(sensor_id)
+    logging.info("Sensor node started")
     setup_logging(sensor_id)
 
     node = SensorNode(sensor_id, args.drone_ip, args.drone_port, args.interval)
