@@ -9,7 +9,9 @@ def setup_logging(name: str):
 
     log_path = os.path.join(log_dir, f"{name}.log")
 
-    file_handler = RotatingFileHandler(log_path, maxBytes=500_000, backupCount=3)
+    #file_handler = RotatingFileHandler(log_path, maxBytes=500_000, backupCount=3)
+    #now overwrites logs at each exec
+    file_handler = logging.FileHandler(log_path, mode='w')
     file_handler.setFormatter(logging.Formatter(
         "%(asctime)s [%(levelname)s] %(message)s", "%Y-%m-%d %H:%M:%S"
     ))
